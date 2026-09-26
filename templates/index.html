@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Oh No! To-Do List</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+  </head>
+  <body>
+    <main class="todo-app">
+      <div class="watermark">Oh no!</div>
+
+      <header class="top-graphic" aria-hidden="true">
+        <div class="sun"></div>
+        <div class="cloud cloud-one"></div>
+        <div class="cloud cloud-two"></div>
+        <div class="cloud cloud-three"></div>
+      </header>
+
+      <section class="todo-panel">
+        <h1>To-Do List</h1>
+
+        <form method="post" action="/" class="task-form">
+          <input type="hidden" name="filter" value="{{ filter_name }}" />
+          <div class="task-input-row">
+            <input type="text" name="title" placeholder="Add a new task" aria-label="Task title" required />
+            <input type="date" name="due_date" aria-label="Due date" />
+            <button type="submit" name="action" value="add" class="primary-button">Add</button>
+          </div>
+        </form>
+
+        <div class="summary-bar">
+          <span>{{ total_tasks }} total</span>
+          <span>{{ active_count }} active</span>
+          <span>{{ completed_count }} completed</span>
+        </div>
+
+        <form method="post" action="/" class="filter-form">
+          <button type="submit" name="filter" value="all" class="{% if filter_name == 'all' %}active{% endif %}">All</button>
+          <button type="submit" name="filter" value="active" class="{% if filter_name == 'active' %}active{% endif %}">Active</button>
+          <button type="submit" name="filter" value="completed" class="{% if filter_name == 'completed' %}active{% endif %}">Completed</button>
+        </form>
+
+        <ul class="task-list">
+          {% for task in tasks %}
+            <li class="task-item {% if task.completed %}completed{% endif %}">
+              {% if editing_task_id == task.id %}
+                <form method="post" action="/" class="edit-form">
+                  <input type="hidden" name="filter" value="{{ filter_name }}" />
+                  <input type="hidden" name="task_id" value="{{ task.id }}" />
+                  <input type="text" name="title" value="{{ task.title }}" aria-label="Edit task title" required />
+                  <input type="date" name="due_date" value="{{ task.due_date }}" aria-label="Edit due date" />
+                  <div class="task-actions">
+                    <button type="submit" name="action" value="save_edit" class="primary-button">Save</button>
+                    <button type="submit" name="action" value="" class="secondary-button">Cancel</button>
+                  </div>
+                </form>
+              {% else %}
+                <div class="task-content">
+                  <div class="task-meta">
+                    <span class="status-pill {% if task.completed %}done{% else %}pending{% endif %}">
+                      {% if task.completed %}completed{% else %}active{% endif %}
+                    </span>
+                    {% if task.due_date %}
+                      <span class="due-date">Due {{ task.due_date }}</span>
+                    {% endif %}
+                  </div>
+                  <p class="task-title">{{ task.title }}</p>
+                </div>
+
+                <div class="task-actions">
+                  <form method="post" action="/" class="inline-form">
+                    <input type="hidden" name="filter" value="{{ filter_name }}" />
+                    <input type="hidden" name="task_id" value="{{ task.id }}" />
+                    <button type="submit" name="action" value="toggle" class="secondary-button">
+                      {% if task.completed %}Mark active{% else %}Mark done{% endif %}
+                    </button>
+                    <button type="submit" name="action" value="start_edit" class="secondary-button">Edit</button>
+                    <button type="submit" name="action" value="delete" class="danger-button">Delete</button>
+                  </form>
+                </div>
+              {% endif %}
+            </li>
+          {% else %}
+            <li class="empty-state">No tasks here yet. Add a task to get started.</li>
+          {% endfor %}
+        </ul>
+
+        <form method="post" action="/" class="clear-form">
+          <input type="hidden" name="filter" value="{{ filter_name }}" />
+          <button type="submit" name="action" value="clear_completed" class="clear-button">Clear completed</button>
+        </form>
+      </section>
+    </main>
+  </body>
+</html>
